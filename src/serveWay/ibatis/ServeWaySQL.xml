@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="serveWay">
+	<typeAlias alias="Order_detailVO" type="serveWay.models.Order_detailVO"/>
+	<typeAlias alias="TypeVO" type="serveWay.models.TypeVO"/>
+	<typeAlias alias="FoodVO" type="serveWay.models.FoodVO"/>
+	<typeAlias alias="MaterialVO" type="serveWay.models.MaterialVO"/>
+	<typeAlias alias="AddVO" type="serveWay.models.AddVO"/>
+	
+	<select id="selectType" resultClass="TypeVO">
+	SELECT type_no, type_name 
+	from type
+	</select>
+	
+	<select id="selectFood" resultClass="FoodVO">
+	select f_no, f_name, f_cal, price, meat, nutrition, kind
+	from food
+	</select>
+	
+	<select id="selectFood1" resultClass="FoodVO">
+	select f_no, f_name, f_cal, price, meat, nutrition, kind
+	from food
+	where kind LIKE 'CLASSICS'
+  	OR kind like 'FAVORITES'
+	</select>
+	
+	<select id="selectFood2" resultClass="FoodVO">
+	select f_no, f_name, f_cal, price, meat, nutrition, kind
+	from food
+	where kind LIKE 'SIGNATURE'
+  	OR kind like 'PREMIUM'
+	</select>
+	
+	<select id="selectMaterial" parameterClass="int" resultClass="MaterialVO">
+	select material_no, material_name, material_exp, material_cal
+	from material
+	where material_type_no=#material_type_no#
+	</select>
+	
+	<select id="selectAdd" parameterClass="int" resultClass="AddVO">
+	select add_no, add_name, add_cal, add_price
+	from addition
+	where add_type_no=#add_type_no#
+	</select>
+
+
+	<select id="selectOrderNum" parameterClass="Order_detailVO" resultClass="int">
+		select SEQ_ORDER_DETAIL_ORDER_NUM.nextval from dual
+	</select>
+	
+	<insert id="insertOrder" parameterClass="Order_detailVO">
+		insert into order_detail(order_num, request_msg, price, total_cal, customer_id, food_f_no, type_type_no, order_date) 
+		values(#order_num#, #request_msg#, #price#, #total_cal#, #customer_id#, #food_f_no#, #type_type_no#, #date#)
+	</insert>
+	
+	<insert id="insertOrderList" parameterClass="Order_detailVO">
+		insert into order_list (list_no, order_detail_order_num, customer_customer_id)
+		values(SEQ_ORDER_LIST_LIST_NO.nextval, #order_num#, #customer_id#)	
+	</insert>
+	
+	<parameterMap class="java.util.Map" id="insertOrderMap">
+		<parameter property="add_add_no" />
+		<parameter property="order_num" />
+	</parameterMap>
+	
+	<insert id="insertOrderAdd" parameterMap="insertOrderMap">
+		insert into orderdetail_add (orderdetail_add_no, add_add_no, order_detail_order_num, add_cnt)
+		values(SEQ_ORDERDETAIL_ADD_NO.nextval, ?, ?, 1)
+	</insert>
+	
+	<parameterMap class="java.util.Map" id="insertOrderMaterialMap">
+		<parameter property="material_material_no" />
+		<parameter property="order_num" />
+	</parameterMap>
+	
+	<insert id="insertOrderMaterial" parameterMap="insertOrderMaterialMap">
+		insert into orderdetail_material (orderdetail_material_no, material_material_no, order_detail_order_num)
+		values (SEQ_ORDERDETAIL_MATERIAL_NO.nextval, ?, ?)
+	</insert>
+	
+	<select id="selectMaterials" parameterClass="Order_detailVO" resultClass="MaterialVO">
+		select material_name, material_type_no
+		from material
+		<iterate prepend="where material_no in" property="materials" open="(" conjunction="," close=")">
+		#materials[]#
+		</iterate>
+	</select>
+
+	<select id="selectAdditions" parameterClass="Order_detailVO" resultClass="AddVO">
+		select add_name, add_type_no
+		from addition
+		<iterate prepend="where add_no in" property="adds" open="(" conjunction="," close=")">
+		#adds[]#
+		</iterate>
+	</select>
+	
+	<select id="selectFood_NAME" parameterClass="int" resultClass="FoodVO">
+		select f_name
+		from food
+		where f_No=#food_f_no#
+	</select>
+
+<select id="selectFood_cal" parameterClass="Order_detailVO" resultClass="int">
+		select f_cal
+		from food
+		where f_No=#food_f_no#
+	</select>
+	
+	<select id="selectFood_price" parameterClass="Order_detailVO" resultClass="int">
+		select price
+		from food
+		where f_No=#food_f_no#
+	</select>
+	
+	<select id="addPrice" parameterClass="int" resultClass="int">
+		select add_price
+		from addition
+		where add_no=#object#
+	</select>
+	
+	<select id="addCal" parameterClass="int" resultClass="int">
+		select material_cal
+		from material
+		where material_no=#material_no#
+	</select>
+	
+	<select id="addCalorie" parameterClass="int" resultClass="int">
+		select add_cal
+		from addition
+		where add_no=#add_no#
+	</select>
+	
+	<select id="subCal" parameterClass="int" resultClass="int">
+		select material_cal-210
+		from material
+		where material_no=#material_no#
+	</select>
+
+</sqlMap>
